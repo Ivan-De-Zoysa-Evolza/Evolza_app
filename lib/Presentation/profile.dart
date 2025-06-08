@@ -1,5 +1,6 @@
 import 'package:evolza_app/core/authentication.dart';
 import 'package:evolza_app/Presentation/widgets/profile_styles.dart';
+import 'package:evolza_app/Presentation/widgets/profile_components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -72,121 +73,40 @@ class _ProfileState extends State<Profile> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.all(20),
-          child: Container(
-            margin: EdgeInsets.all(20),
-            padding: EdgeInsets.all(25),
-            decoration: ProfileStyles.popupContainerDecoration,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(15),
-                  decoration: ProfileStyles.popupIconDecoration,
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Profile Picture",
-                  style: ProfileStyles.popupTitleStyle,
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Choose an option",
-                  style: ProfileStyles.popupSubtitleStyle,
-                ),
-                SizedBox(height: 30),
-                Container(
-                  width: double.infinity,
-                  decoration: ProfileStyles.updateButtonDecoration,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _pickImageFromGallery();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.photo_library, size: 22),
-                        SizedBox(width: 8),
-                        Text(
-                          "Add Profile Picture",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 15),
-                if (_profilePictureUrl != null || _selectedImage != null)
-                  Container(
-                    width: double.infinity,
-                    decoration: ProfileStyles.removeButtonDecoration,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _removeProfilePicture();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.delete_outline, size: 22),
-                          SizedBox(width: 8),
-                          Text(
-                            "Remove Profile Picture",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                SizedBox(height: 15),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    "Cancel",
-                    style: TextStyle(
-                      color: Colors.blue.shade600,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
+        return ProfileDialog(
+          title: "Profile Picture",
+          subtitle: "Choose an option",
+          icon: Icons.camera_alt,
+          children: [
+            ProfileDialogButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _pickImageFromGallery();
+              },
+              icon: Icons.photo_library,
+              text: "Add Profile Picture",
+              decoration: ProfileStyles.updateButtonDecoration,
             ),
-          ),
+            SizedBox(height: 15),
+            if (_profilePictureUrl != null || _selectedImage != null)
+              ProfileDialogButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _removeProfilePicture();
+                },
+                icon: Icons.delete_outline,
+                text: "Remove Profile Picture",
+                decoration: ProfileStyles.removeButtonDecoration,
+              ),
+            SizedBox(height: 15),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                "Cancel",
+                style: ProfileStyles.profileDialogCancelTextStyle,
+              ),
+            ),
+          ],
         );
       },
     );
@@ -564,11 +484,7 @@ class _ProfileState extends State<Profile> {
                       children: [
                         _buildProfilePicture(),
                         SizedBox(height: 40),
-                        _buildProfileInfoRow(Icons.email_outlined, "Email", _currentUser!.email.toString()),
-                        SizedBox(height: 20),
-                        _buildProfileInfoRow(Icons.person_outline, "Name", _currentName ?? 'Name not set'),
-                        SizedBox(height: 20),
-                        _buildProfileInfoRow(Icons.phone_outlined, "Phone", _currentPhoneNumber ?? 'Phone not set'),
+                        _buildProfileInfo(),
                         SizedBox(height: 50),
                         Container(
                           width: double.infinity,
@@ -609,40 +525,21 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildProfileInfoRow(IconData icon, String label, String value) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: ProfileStyles.infoRowDecoration,
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: ProfileStyles.infoIconDecoration,
-            child: Icon(
-              icon,
-              color: Colors.blue.shade600,
-              size: 20,
-            ),
-          ),
-          SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: ProfileStyles.infoLabelStyle,
-                ),
-                SizedBox(height: 2),
-                Text(
-                  value,
-                  style: ProfileStyles.infoValueStyle,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  Widget _buildProfileInfo() {
+    return Column(
+      children: [
+        ProfileInfoRow(
+          icon: Icons.person,
+          label: "Name",
+          value: _currentName ?? "Not set",
+        ),
+        SizedBox(height: 12),
+        ProfileInfoRow(
+          icon: Icons.phone,
+          label: "Phone Number",
+          value: _currentPhoneNumber ?? "Not set",
+        ),
+      ],
     );
   }
 }

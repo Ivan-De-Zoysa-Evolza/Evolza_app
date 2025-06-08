@@ -217,4 +217,27 @@ class ProfileStyles {
       ),
     ],
   );
+
+  // Profile Picture Dialog Styles
+  static ButtonStyle profileDialogButtonStyle = ElevatedButton.styleFrom(
+    padding: const EdgeInsets.symmetric(vertical: 15),
+    backgroundColor: Colors.transparent,
+    shadowColor: Colors.transparent,
+    foregroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+    ),
+  );
+
+  static TextStyle profileDialogButtonTextStyle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.5,
+  );
+
+  static TextStyle profileDialogCancelTextStyle = TextStyle(
+    color: Colors.blue.shade600,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
 }
