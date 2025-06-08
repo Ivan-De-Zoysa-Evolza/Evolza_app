@@ -88,14 +88,33 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildUpdatePopup() {
     return Container(
-      color: Colors.black54,
+      color: Colors.black.withOpacity(0.3), // Transparent background
       child: Center(
         child: Container(
           margin: EdgeInsets.all(20),
-          padding: EdgeInsets.all(25),
+          padding: EdgeInsets.all(30),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withOpacity(0.95),
+                Colors.blue.shade50.withOpacity(0.95),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(
+              color: Colors.blue.shade200.withOpacity(0.5),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.2),
+                blurRadius: 20,
+                offset: Offset(0, 10),
+                spreadRadius: 5,
+              ),
+            ],
           ),
           child: Form(
             key: _formKey,
@@ -103,15 +122,59 @@ class _ProfileState extends State<Profile> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Complete Your Profile",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade600,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.person_add_alt_1,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        "Complete Your Profile",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Please fill in your details to continue",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 20),
-                Text("Name"),
+                SizedBox(height: 30),
+                Text(
+                  "Name",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue.shade800,
+                  ),
+                ),
                 SizedBox(height: 8),
                 TextFormField(
                   controller: _nameController,
@@ -121,23 +184,49 @@ class _ProfileState extends State<Profile> {
                     }
                     return null;
                   },
+                  style: TextStyle(
+                    color: Colors.blue.shade900,
+                    fontWeight: FontWeight.w500,
+                  ),
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.8),
+                    hintText: "Enter your full name",
+                    hintStyle: TextStyle(
+                      color: Colors.blue.shade400,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: Colors.blue.shade600,
+                    ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 2),
+                      borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 2),
+                      borderSide: BorderSide(color: Colors.blue.shade300, width: 1.5),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red, width: 2),
+                      borderSide: BorderSide(color: Colors.red.shade500, width: 2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red, width: 2),
+                      borderSide: BorderSide(color: Colors.red.shade500, width: 2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                 ),
                 SizedBox(height: 20),
-                Text("Phone number"),
+                Text(
+                  "Phone Number",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue.shade800,
+                  ),
+                ),
                 SizedBox(height: 8),
                 TextFormField(
                   controller: _phoneController,
@@ -147,36 +236,84 @@ class _ProfileState extends State<Profile> {
                     }
                     return null;
                   },
+                  style: TextStyle(
+                    color: Colors.blue.shade900,
+                    fontWeight: FontWeight.w500,
+                  ),
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.8),
+                    hintText: "Enter your phone number",
+                    hintStyle: TextStyle(
+                      color: Colors.blue.shade400,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.phone_outlined,
+                      color: Colors.blue.shade600,
+                    ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 2),
+                      borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 2),
+                      borderSide: BorderSide(color: Colors.blue.shade300, width: 1.5),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red, width: 2),
+                      borderSide: BorderSide(color: Colors.red.shade500, width: 2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red, width: 2),
+                      borderSide: BorderSide(color: Colors.red.shade500, width: 2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                 ),
-                SizedBox(height: 30),
-                SizedBox(
+                SizedBox(height: 35),
+                Container(
                   width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade600, Colors.blue.shade800],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
                   child: ElevatedButton(
                     onPressed: _update,
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      elevation: 5,
                     ),
-                    child: Text("Update"),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle_outline, size: 22),
+                        SizedBox(width: 8),
+                        Text(
+                          "Update Profile",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
