@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "809496284148",
+    "project_id": "evolzaapp1",
+    "storage_bucket": "evolzaapp1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809496284148:android:735f4c3da785e0828fc7a1",
+        "android_client_info": {
+          "package_name": "com.example.evolza_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUDs5JWRJG7Rn-gRWc_0VhX71gtOp_EZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
