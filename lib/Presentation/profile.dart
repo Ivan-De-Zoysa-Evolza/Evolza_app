@@ -1,4 +1,3 @@
-import 'package:evolza_app/Presentation/widgets/widgets.dart';
 import 'package:evolza_app/core/authentication.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
