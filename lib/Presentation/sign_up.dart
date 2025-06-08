@@ -1,7 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:evolza_app/core/authentication.dart';
 import 'package:evolza_app/Presentation/app_router.dart';
-import 'package:evolza_app/Presentation/widgets/widgets.dart';
+import 'package:evolza_app/Presentation/widgets/auth_styles.dart';
+import 'package:evolza_app/Presentation/widgets/auth_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -92,7 +93,6 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
         }
       } else {
         print("Something wrong");
-        // Show error snackbar
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -115,12 +115,8 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1e3c72),
-              Color(0xFF2a5298),
-              Color(0xFF3b82f6),
-            ],
-            stops: [0.0, 0.5, 1.0],
+            colors: AuthStyles.gradientColors,
+            stops: AuthStyles.gradientStops,
           ),
         ),
         child: SafeArea(
@@ -135,40 +131,19 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
                     children: [
                       const SizedBox(height: 40),
 
-                      Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
+                      AuthContainer(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
                               "Evolza",
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1e3c72),
-                                letterSpacing: 1,
-                              ),
+                              style: AuthStyles.titleStyle,
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 12),
                             const Text(
                               "Create Your Account",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF6b7280),
-                                letterSpacing: 0.5,
-                              ),
+                              style: AuthStyles.subtitleStyle,
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -177,20 +152,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
 
                       const SizedBox(height: 50),
 
-                      // Sign Up Form
-                      Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
+                      AuthFormContainer(
                         child: Form(
                           key: formKey,
                           child: Column(
@@ -198,79 +160,20 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
                             children: [
                               const Text(
                                 "Sign Up",
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1e3c72),
-                                ),
+                                style: AuthStyles.formTitleStyle,
                               ),
                               const SizedBox(height: 8),
                               const Text(
                                 "Fill in the details to create your account",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF6b7280),
-                                ),
+                                style: AuthStyles.formSubtitleStyle,
                               ),
                               const SizedBox(height: 32),
 
-                              // Email Field
-                              Text(
-                                "Email Address",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF374151),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              TextFormField(
+                              AuthTextField(
                                 controller: _emailController,
-                                style: const TextStyle(color: Color(0xFF111827)),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Color(0xFFf9fafb),
-                                  prefixIcon: Icon(
-                                    Icons.email_outlined,
-                                    color: Color(0xFF6b7280),
-                                  ),
-                                  hintText: "Enter your email",
-                                  hintStyle: TextStyle(
-                                    color: Color(0xFF9ca3af),
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFFe5e7eb),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFFe5e7eb),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFF3b82f6),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Colors.red,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                ),
+                                label: "Email Address",
+                                hintText: "Enter your email",
+                                prefixIcon: Icons.email_outlined,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return "Please enter your email";
@@ -284,64 +187,12 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
 
                               const SizedBox(height: 24),
 
-                              // Password Field
-                              Text(
-                                "Password",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF374151),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                obscureText: true,
+                              AuthTextField(
                                 controller: _passwordController,
-                                style: const TextStyle(color: Color(0xFF111827)),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Color(0xFFf9fafb),
-                                  prefixIcon: Icon(
-                                    Icons.lock_outline,
-                                    color: Color(0xFF6b7280),
-                                  ),
-                                  hintText: "Enter your password",
-                                  hintStyle: TextStyle(
-                                    color: Color(0xFF9ca3af),
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFFe5e7eb),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFFe5e7eb),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFF3b82f6),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Colors.red,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                ),
+                                label: "Password",
+                                hintText: "Enter your password",
+                                prefixIcon: Icons.lock_outline,
+                                obscureText: true,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter your password';
@@ -355,64 +206,12 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
 
                               const SizedBox(height: 24),
 
-                              // Confirm Password Field
-                              Text(
-                                "Confirm Password",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF374151),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                obscureText: true,
+                              AuthTextField(
                                 controller: _confirmPasswordController,
-                                style: const TextStyle(color: Color(0xFF111827)),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Color(0xFFf9fafb),
-                                  prefixIcon: Icon(
-                                    Icons.lock_outline,
-                                    color: Color(0xFF6b7280),
-                                  ),
-                                  hintText: "Confirm your password",
-                                  hintStyle: TextStyle(
-                                    color: Color(0xFF9ca3af),
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFFe5e7eb),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFFe5e7eb),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Color(0xFF3b82f6),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Colors.red,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                ),
+                                label: "Confirm Password",
+                                hintText: "Confirm your password",
+                                prefixIcon: Icons.lock_outline,
+                                obscureText: true,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter your password';
@@ -429,69 +228,20 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin {
 
                               const SizedBox(height: 32),
 
-                              // Register Button
-                              SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _login,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xFF3b82f6),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 2,
-                                    shadowColor: Color(0xFF3b82f6).withOpacity(0.3),
-                                  ),
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                      : const Text(
-                                    "Create Account",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                              AuthButton(
+                                text: "Create Account",
+                                onPressed: _login,
+                                isLoading: _isLoading,
                               ),
 
                               const SizedBox(height: 24),
 
-                              // Login Link
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Already have an account? ",
-                                    style: TextStyle(
-                                      color: Color(0xFF6b7280),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      context.go(AppRouter.loginPath);
-                                    },
-                                    child: Text(
-                                      "Sign In",
-                                      style: TextStyle(
-                                        color: Color(0xFF3b82f6),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              AuthLink(
+                                text: "Already have an account? ",
+                                linkText: "Sign In",
+                                onTap: () {
+                                  context.go(AppRouter.loginPath);
+                                },
                               ),
                             ],
                           ),
