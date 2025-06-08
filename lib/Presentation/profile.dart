@@ -1,7 +1,10 @@
 import 'package:evolza_app/core/authentication.dart';
 import 'package:evolza_app/Presentation/widgets/profile_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -16,10 +19,12 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _phoneController = TextEditingController();
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
 
   String? _currentName;
   String? _currentPhoneNumber;
   String? _profilePictureUrl;
+  File? _selectedImage;
   bool _showPopup = false;
   bool _isDataLoaded = false;
 
@@ -63,6 +68,220 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  void _showProfilePictureOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(20),
+          child: Container(
+            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.all(25),
+            decoration: ProfileStyles.popupContainerDecoration,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: ProfileStyles.popupIconDecoration,
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Profile Picture",
+                  style: ProfileStyles.popupTitleStyle,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Choose an option",
+                  style: ProfileStyles.popupSubtitleStyle,
+                ),
+                SizedBox(height: 30),
+                Container(
+                  width: double.infinity,
+                  decoration: ProfileStyles.updateButtonDecoration,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _pickImageFromGallery();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.photo_library, size: 22),
+                        SizedBox(width: 8),
+                        Text(
+                          "Add Profile Picture",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                if (_profilePictureUrl != null || _selectedImage != null)
+                  Container(
+                    width: double.infinity,
+                    decoration: ProfileStyles.removeButtonDecoration,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _removeProfilePicture();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.delete_outline, size: 22),
+                          SizedBox(width: 8),
+                          Text(
+                            "Remove Profile Picture",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 15),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      color: Colors.blue.shade600,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 75,
+    );
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+
+      // Here you would typically upload the image to Firebase Storage
+      // and update the user's profile with the image URL
+      // For now, we'll just store it locally
+      await _updateProfilePicture(image.path);
+    }
+  }
+
+  Future<void> _updateProfilePicture(String imagePath) async {
+    try {
+      // Upload to Firebase Storage
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures')
+          .child('${_currentUser!.uid}.jpg');
+
+      await ref.putFile(File(imagePath));
+      final downloadUrl = await ref.getDownloadURL();
+
+      // Update user profile with the download URL
+      Map<String, dynamic> updatedData = {
+        'profilePictureUrl': downloadUrl,
+      };
+      await _authService.updateUserProfile(_currentUser!.uid, updatedData);
+
+      setState(() {
+        _profilePictureUrl = downloadUrl;
+      });
+    } catch (e) {
+      // Handle error
+      print('Error uploading profile picture: $e');
+      // You might want to show a snackbar or dialog to inform the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to upload profile picture. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _removeProfilePicture() async {
+    try {
+      // Delete from Firebase Storage if it exists
+      if (_profilePictureUrl != null && _profilePictureUrl!.startsWith('http')) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('profile_pictures')
+            .child('${_currentUser!.uid}.jpg');
+
+        await ref.delete();
+      }
+
+      // Update user profile to remove the picture URL
+      Map<String, dynamic> updatedData = {
+        'profilePictureUrl': null,
+      };
+      await _authService.updateUserProfile(_currentUser!.uid, updatedData);
+
+      setState(() {
+        _profilePictureUrl = null;
+        _selectedImage = null;
+      });
+    } catch (e) {
+      print('Error removing profile picture: $e');
+      // Still update the profile even if deletion from storage fails
+      Map<String, dynamic> updatedData = {
+        'profilePictureUrl': null,
+      };
+      await _authService.updateUserProfile(_currentUser!.uid, updatedData);
+
+      setState(() {
+        _profilePictureUrl = null;
+        _selectedImage = null;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -81,6 +300,7 @@ class _ProfileState extends State<Profile> {
             setState(() {
               _currentName = data['name'] ?? '';
               _currentPhoneNumber = data['phoneNumber'] ?? '';
+              _profilePictureUrl = data['profilePictureUrl'];
               _isDataLoaded = true;
 
               if ((_currentName == null || _currentName!.isEmpty ||
@@ -103,6 +323,72 @@ class _ProfileState extends State<Profile> {
           });
         }
       });
+    }
+  }
+
+  Widget _buildProfilePicture() {
+    return GestureDetector(
+      onTap: _showProfilePictureOptions,
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: ProfileStyles.profileIconDecoration,
+        child: _buildProfilePictureContent(),
+      ),
+    );
+  }
+
+  Widget _buildProfilePictureContent() {
+    if (_selectedImage != null) {
+      return ClipOval(
+        child: Image.file(
+          _selectedImage!,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else if (_profilePictureUrl != null && _profilePictureUrl!.isNotEmpty) {
+      // If it's a network URL (Firebase Storage URL)
+      if (_profilePictureUrl!.startsWith('http')) {
+        return ClipOval(
+          child: Image.network(
+            _profilePictureUrl!,
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 50,
+              );
+            },
+          ),
+        );
+      } else {
+        // If it's a local file path
+        return ClipOval(
+          child: Image.file(
+            File(_profilePictureUrl!),
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 50,
+              );
+            },
+          ),
+        );
+      }
+    } else {
+      return Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 50,
+      );
     }
   }
 
@@ -276,15 +562,7 @@ class _ProfileState extends State<Profile> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(20),
-                          decoration: ProfileStyles.profileIconDecoration,
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                        ),
+                        _buildProfilePicture(),
                         SizedBox(height: 40),
                         _buildProfileInfoRow(Icons.email_outlined, "Email", _currentUser!.email.toString()),
                         SizedBox(height: 20),

@@ -200,4 +200,21 @@ class ProfileStyles {
       ),
     ],
   );
-} 
+
+  // New decoration for remove button
+  static BoxDecoration removeButtonDecoration = BoxDecoration(
+    gradient: LinearGradient(
+      colors: [Colors.red.shade500, Colors.red.shade700],
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    ),
+    borderRadius: BorderRadius.circular(15),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.red.withOpacity(0.4),
+        blurRadius: 12,
+        offset: Offset(0, 6),
+      ),
+    ],
+  );
+}
