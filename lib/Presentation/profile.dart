@@ -1,4 +1,5 @@
 import 'package:evolza_app/core/authentication.dart';
+import 'package:evolza_app/Presentation/widgets/profile_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,6 @@ class _ProfileState extends State<Profile> {
       };
       await _authService.updateUserProfile(_currentUser!.uid, updatedData);
 
-      // Close the popup after successful update
       if (_showPopup) {
         setState(() {
           _showPopup = false;
@@ -45,15 +45,14 @@ class _ProfileState extends State<Profile> {
     });
   }
 
-  // Method to show modal popup
   void _showModalPopup() {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevents dismissing by tapping outside
+      barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.3),
       builder: (BuildContext context) {
         return WillPopScope(
-          onWillPop: () async => false, // Prevents back button from closing
+          onWillPop: () async => false,
           child: Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: EdgeInsets.all(20),
@@ -75,7 +74,6 @@ class _ProfileState extends State<Profile> {
   void initState() {
     super.initState();
     if (_currentUser != null) {
-      // Listen to profile changes in real-time
       _authService.getUserProfile(_currentUser!.uid).listen((snapshot) {
         if (snapshot.exists) {
           final data = snapshot.data();
@@ -85,12 +83,10 @@ class _ProfileState extends State<Profile> {
               _currentPhoneNumber = data['phoneNumber'] ?? '';
               _isDataLoaded = true;
 
-              // Show modal popup if name or phone number is empty and popup is not already shown
               if ((_currentName == null || _currentName!.isEmpty ||
                   _currentPhoneNumber == null || _currentPhoneNumber!.isEmpty) &&
                   !_showPopup) {
                 _showPopup = true;
-                // Show modal popup after widget is built
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _showModalPopup();
                 });
@@ -98,11 +94,9 @@ class _ProfileState extends State<Profile> {
             });
           }
         } else {
-          // If no profile data exists, show the popup
           setState(() {
             _isDataLoaded = true;
             _showPopup = true;
-            // Show modal popup after widget is built
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _showModalPopup();
             });
@@ -116,29 +110,7 @@ class _ProfileState extends State<Profile> {
     return Container(
       margin: EdgeInsets.all(20),
       padding: EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withOpacity(0.95),
-            Colors.blue.shade50.withOpacity(0.95),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: Colors.blue.shade200.withOpacity(0.5),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.2),
-            blurRadius: 20,
-            offset: Offset(0, 10),
-            spreadRadius: 5,
-          ),
-        ],
-      ),
+      decoration: ProfileStyles.popupContainerDecoration,
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -151,17 +123,7 @@ class _ProfileState extends State<Profile> {
                   children: [
                     Container(
                       padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade600,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
+                      decoration: ProfileStyles.popupIconDecoration,
                       child: Icon(
                         Icons.person_add_alt_1,
                         color: Colors.white,
@@ -171,21 +133,12 @@ class _ProfileState extends State<Profile> {
                     SizedBox(height: 15),
                     Text(
                       "Complete Your Profile",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
-                        letterSpacing: 0.5,
-                      ),
+                      style: ProfileStyles.popupTitleStyle,
                     ),
                     SizedBox(height: 8),
                     Text(
                       "Please fill in your details to continue",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: ProfileStyles.popupSubtitleStyle,
                     ),
                   ],
                 ),
@@ -193,11 +146,7 @@ class _ProfileState extends State<Profile> {
               SizedBox(height: 30),
               Text(
                 "Name",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade800,
-                ),
+                style: ProfileStyles.popupLabelStyle,
               ),
               SizedBox(height: 8),
               TextFormField(
@@ -212,44 +161,15 @@ class _ProfileState extends State<Profile> {
                   color: Colors.blue.shade900,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.8),
+                decoration: ProfileStyles.textFieldDecoration(
                   hintText: "Enter your full name",
-                  hintStyle: TextStyle(
-                    color: Colors.blue.shade400,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.person_outline,
-                    color: Colors.blue.shade600,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.shade300, width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red.shade500, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red.shade500, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  prefixIcon: Icons.person_outline,
                 ),
               ),
               SizedBox(height: 20),
               Text(
                 "Phone Number",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade800,
-                ),
+                style: ProfileStyles.popupLabelStyle,
               ),
               SizedBox(height: 8),
               TextFormField(
@@ -264,54 +184,15 @@ class _ProfileState extends State<Profile> {
                   color: Colors.blue.shade900,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.8),
+                decoration: ProfileStyles.textFieldDecoration(
                   hintText: "Enter your phone number",
-                  hintStyle: TextStyle(
-                    color: Colors.blue.shade400,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.phone_outlined,
-                    color: Colors.blue.shade600,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.shade300, width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red.shade500, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red.shade500, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  prefixIcon: Icons.phone_outlined,
                 ),
               ),
               SizedBox(height: 35),
               Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blue.shade600, Colors.blue.shade800],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.4),
-                      blurRadius: 12,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
+                decoration: ProfileStyles.updateButtonDecoration,
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
@@ -320,8 +201,6 @@ class _ProfileState extends State<Profile> {
                         'phoneNumber': _phoneController.text,
                       };
                       await _authService.updateUserProfile(_currentUser!.uid, updatedData);
-
-                      // Close the modal popup after successful update
                       Navigator.of(context).pop();
                       setState(() {
                         _showPopup = false;
@@ -385,40 +264,12 @@ class _ProfileState extends State<Profile> {
                 horizontal: 30,
                 vertical: 40,
               ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withOpacity(0.95),
-                    Colors.blue.shade50.withOpacity(0.95),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(
-                  color: Colors.blue.shade200.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: Offset(0, 10),
-                    spreadRadius: 5,
-                  ),
-                ],
-              ),
+              decoration: ProfileStyles.mainContainerDecoration,
               child: Column(
                 children: [
-                  // Profile Title inside the container
                   Text(
                     "Profile",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade800,
-                      letterSpacing: 1.0,
-                    ),
+                    style: ProfileStyles.profileTitleStyle,
                   ),
                   SizedBox(height: 40),
                   Expanded(
@@ -427,17 +278,7 @@ class _ProfileState extends State<Profile> {
                       children: [
                         Container(
                           padding: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade600,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.3),
-                                blurRadius: 15,
-                                offset: Offset(0, 8),
-                              ),
-                            ],
-                          ),
+                          decoration: ProfileStyles.profileIconDecoration,
                           child: Icon(
                             Icons.person,
                             color: Colors.white,
@@ -451,24 +292,9 @@ class _ProfileState extends State<Profile> {
                         SizedBox(height: 20),
                         _buildProfileInfoRow(Icons.phone_outlined, "Phone", _currentPhoneNumber ?? 'Phone not set'),
                         SizedBox(height: 50),
-                        // Edit Profile Button
                         Container(
                           width: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.blue.shade600, Colors.blue.shade800],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.4),
-                                blurRadius: 15,
-                                offset: Offset(0, 8),
-                              ),
-                            ],
-                          ),
+                          decoration: ProfileStyles.editButtonDecoration,
                           child: ElevatedButton(
                             onPressed: _showModalPopup,
                             style: ElevatedButton.styleFrom(
@@ -487,11 +313,7 @@ class _ProfileState extends State<Profile> {
                                 SizedBox(width: 10),
                                 Text(
                                   "Edit Profile",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.5,
-                                  ),
+                                  style: ProfileStyles.editButtonTextStyle,
                                 ),
                               ],
                             ),
@@ -512,22 +334,12 @@ class _ProfileState extends State<Profile> {
   Widget _buildProfileInfoRow(IconData icon, String label, String value) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.blue.shade200.withOpacity(0.5),
-          width: 1,
-        ),
-      ),
+      decoration: ProfileStyles.infoRowDecoration,
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: ProfileStyles.infoIconDecoration,
             child: Icon(
               icon,
               color: Colors.blue.shade600,
@@ -541,20 +353,12 @@ class _ProfileState extends State<Profile> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: ProfileStyles.infoLabelStyle,
                 ),
                 SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue.shade800,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: ProfileStyles.infoValueStyle,
                 ),
               ],
             ),
