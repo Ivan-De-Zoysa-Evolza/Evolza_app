@@ -2,10 +2,11 @@ import 'package:evolza_app/core/authentication.dart';
 import 'package:evolza_app/Presentation/widgets/profile_styles.dart';
 import 'package:evolza_app/Presentation/widgets/profile_components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -25,6 +26,7 @@ class _ProfileState extends State<Profile> {
   String? _currentName;
   String? _currentPhoneNumber;
   String? _profilePictureUrl;
+  String? _profilePictureBase64;
   File? _selectedImage;
   bool _showPopup = false;
   bool _isDataLoaded = false;
@@ -88,7 +90,7 @@ class _ProfileState extends State<Profile> {
               decoration: ProfileStyles.updateButtonDecoration,
             ),
             SizedBox(height: 15),
-            if (_profilePictureUrl != null || _selectedImage != null)
+            if (_profilePictureBase64 != null || _selectedImage != null)
               ProfileDialogButton(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -125,37 +127,33 @@ class _ProfileState extends State<Profile> {
         _selectedImage = File(image.path);
       });
 
-      // Here you would typically upload the image to Firebase Storage
-      // and update the user's profile with the image URL
-      // For now, we'll just store it locally
+      // Convert image to base64 and update profile
       await _updateProfilePicture(image.path);
     }
   }
 
   Future<void> _updateProfilePicture(String imagePath) async {
     try {
-      // Upload to Firebase Storage
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('profile_pictures')
-          .child('${_currentUser!.uid}.jpg');
+      // Read the image file
+      File imageFile = File(imagePath);
+      Uint8List imageBytes = await imageFile.readAsBytes();
 
-      await ref.putFile(File(imagePath));
-      final downloadUrl = await ref.getDownloadURL();
+      // Convert to base64
+      String base64Image = base64Encode(imageBytes);
 
-      // Update user profile with the download URL
+      // Update user profile with base64 string
       Map<String, dynamic> updatedData = {
-        'profilePictureUrl': downloadUrl,
+        'profilePictureBase64': base64Image,
       };
       await _authService.updateUserProfile(_currentUser!.uid, updatedData);
 
       setState(() {
-        _profilePictureUrl = downloadUrl;
+        _profilePictureBase64 = base64Image;
+        _selectedImage = null; // Clear selected image after saving
       });
     } catch (e) {
       // Handle error
       print('Error uploading profile picture: $e');
-      // You might want to show a snackbar or dialog to inform the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to upload profile picture. Please try again.'),
@@ -167,35 +165,22 @@ class _ProfileState extends State<Profile> {
 
   Future<void> _removeProfilePicture() async {
     try {
-      // Delete from Firebase Storage if it exists
-      if (_profilePictureUrl != null && _profilePictureUrl!.startsWith('http')) {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('profile_pictures')
-            .child('${_currentUser!.uid}.jpg');
-
-        await ref.delete();
-      }
-
-      // Update user profile to remove the picture URL
+      // Update user profile to remove the picture
       Map<String, dynamic> updatedData = {
-        'profilePictureUrl': null,
+        'profilePictureBase64': null,
       };
       await _authService.updateUserProfile(_currentUser!.uid, updatedData);
 
       setState(() {
+        _profilePictureBase64 = null;
         _profilePictureUrl = null;
         _selectedImage = null;
       });
     } catch (e) {
       print('Error removing profile picture: $e');
-      // Still update the profile even if deletion from storage fails
-      Map<String, dynamic> updatedData = {
-        'profilePictureUrl': null,
-      };
-      await _authService.updateUserProfile(_currentUser!.uid, updatedData);
-
+      // Still update the profile even if there's an error
       setState(() {
+        _profilePictureBase64 = null;
         _profilePictureUrl = null;
         _selectedImage = null;
       });
@@ -220,7 +205,12 @@ class _ProfileState extends State<Profile> {
             setState(() {
               _currentName = data['name'] ?? '';
               _currentPhoneNumber = data['phoneNumber'] ?? '';
+
+              // Handle base64 image data
+              _profilePictureBase64 = data['profilePictureBase64'];
+              // Keep backward compatibility with old profilePictureUrl
               _profilePictureUrl = data['profilePictureUrl'];
+
               _isDataLoaded = true;
 
               if ((_currentName == null || _currentName!.isEmpty ||
@@ -258,6 +248,7 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget _buildProfilePictureContent() {
+    // Priority: Selected image > Base64 > URL > Default icon
     if (_selectedImage != null) {
       return ClipOval(
         child: Image.file(
@@ -267,8 +258,28 @@ class _ProfileState extends State<Profile> {
           fit: BoxFit.cover,
         ),
       );
+    } else if (_profilePictureBase64 != null && _profilePictureBase64!.isNotEmpty) {
+      // Display base64 image
+      try {
+        Uint8List imageBytes = base64Decode(_profilePictureBase64!);
+        return ClipOval(
+          child: Image.memory(
+            imageBytes,
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (e) {
+        print('Error decoding base64 image: $e');
+        return Icon(
+          Icons.person,
+          color: Colors.white,
+          size: 50,
+        );
+      }
     } else if (_profilePictureUrl != null && _profilePictureUrl!.isNotEmpty) {
-      // If it's a network URL (Firebase Storage URL)
+      // Backward compatibility: Handle old URL-based images
       if (_profilePictureUrl!.startsWith('http')) {
         return ClipOval(
           child: Image.network(
